@@ -1,4 +1,17 @@
+RUN IN TERMINAL:
+
+npx expo start --tunnel ngrok
+
+
+
+
+
+
 # Welcome to your Expo app 👋
+
+## Built-in recipe generator
+
+PantryPrep creates recipe suggestions on-device using your pantry and meal preferences. It works offline and does not require an AI account, API key, or external provider.
 
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
 
