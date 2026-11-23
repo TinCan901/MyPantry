@@ -23,13 +23,11 @@ The **Meals → Ask AI** option sends only your typed request to an OpenAI-power
 The server uses Node.js 20 or newer. Deploy `server/recipe-server.mjs` to a Node host behind HTTPS and configure these environment variables in the host's secret settings:
 
 - `OPENAI_API_KEY`: your OpenAI API key. Never put it in the app or share it in chat.
-- `RECIPE_ACCESS_TOKEN`: a random secret of at least 32 characters. Generate one locally with `node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))"`. Enter this token in the app, not the OpenAI key.
-- `RECIPE_ALLOWED_ORIGINS`: comma-separated exact origins of your web app, such as `https://example.com`. Required for web browsers; native apps do not send a browser origin.
 - `PORT`: supplied by the host, or defaults to 3001. `OPENAI_MODEL` is optional and defaults to `gpt-5.4-mini`.
 
-Run the server with `node server/recipe-server.mjs`. In **Ask AI**, enter the HTTPS base URL and access token, then describe the dish. The token is kept in memory only, so it must be entered again after restarting the app. For local browser testing, HTTP is allowed only for `localhost` or `127.0.0.1`; include the browser's exact origin in `RECIPE_ALLOWED_ORIGINS`. Phone apps generally need a deployed HTTPS URL.
+Run the server with `node server/recipe-server.mjs`. In **Ask AI**, enter only the HTTPS base URL, then describe the dish. For local browser testing, HTTP is allowed only for `localhost` or `127.0.0.1`. Phone apps generally need a deployed HTTPS URL.
 
-The server requires the access token, limits request sizes and applies a basic per-process request limit. For an internet-facing deployment, use a hosting provider's HTTPS, additional rate limiting and spending limits; protect and rotate the access token if exposed. OpenAI usage can incur charges. Run backend checks with `node --test server/recipe-server.test.mjs`.
+This server is public: it limits request sizes and applies a basic per-process request limit, but anyone who knows the URL can use it. For an internet-facing deployment, use provider-side authentication or rate limiting where available, set OpenAI spending limits, and monitor usage. OpenAI usage can incur charges. Run backend checks with `node --test server/recipe-server.test.mjs`.
 
 ## Host the web app on Render
 

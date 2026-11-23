@@ -14,12 +14,11 @@ function isRecipe(value: unknown): value is Omit<Recipe, 'id'> {
     validLines(recipe.ingredients) && validLines(recipe.steps);
 }
 
-export async function requestAiRecipe(serverUrl: string, accessToken: string, request: string): Promise<Omit<Recipe, 'id'>> {
+export async function requestAiRecipe(serverUrl: string, request: string): Promise<Omit<Recipe, 'id'>> {
   const base = serverUrl.trim().replace(/\/+$/, '');
   if (!/^(https:\/\/[a-z0-9.-]+(?::\d+)?|http:\/\/(?:localhost|127\.0\.0\.1)(?::\d+)?)(?:\/[a-z0-9._~/-]*)?$/i.test(base)) {
     throw new Error('Enter an HTTPS server URL (HTTP is only allowed for localhost).');
   }
-  if (!accessToken.trim()) throw new Error('Enter the server access token.');
   if (!request.trim() || request.length > 500) throw new Error('Enter a recipe request of up to 500 characters.');
 
   const controller = new AbortController();
@@ -27,7 +26,7 @@ export async function requestAiRecipe(serverUrl: string, accessToken: string, re
   try {
     const response = await fetch(`${base}/recipe`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken.trim()}` },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ request: request.trim() }),
       signal: controller.signal,
     });

@@ -1,5 +1,4 @@
 import { createServer } from 'node:http';
-import { timingSafeEqual } from 'node:crypto';
 import { pathToFileURL } from 'node:url';
 
 const schema = {
@@ -27,33 +26,19 @@ function validRecipe(value) {
     validLines(value.ingredients) && validLines(value.steps);
 }
 
-function authorized(header, token) {
-  const supplied = Buffer.from(header?.startsWith('Bearer ') ? header.slice(7) : '');
-  const expected = Buffer.from(token);
-  return supplied.length === expected.length && timingSafeEqual(supplied, expected);
-}
-
 function respond(res, status, value) {
   res.writeHead(status, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
   res.end(JSON.stringify(value));
 }
 
-export function createRecipeServer({ apiKey, accessToken, allowedOrigins = [], model = 'gpt-5.4-mini', fetchImpl = fetch }) {
-  if (!apiKey || !accessToken || accessToken.length < 32) {
-    throw new Error('OPENAI_API_KEY and a RECIPE_ACCESS_TOKEN of at least 32 characters are required.');
+export function createRecipeServer({ apiKey, model = 'gpt-5.4-mini', fetchImpl = fetch }) {
+  if (!apiKey) {
+    throw new Error('OPENAI_API_KEY is required.');
   }
   let requests = [];
   let activeRequests = 0;
   return createServer(async (req, res) => {
-    const origin = req.headers.origin;
-    if (origin && !allowedOrigins.includes(origin)) {
-      respond(res, 403, { error: 'This web origin is not allowed.' });
-      return;
-    }
-    if (origin) {
-      res.setHeader('Access-Control-Allow-Origin', origin);
-      res.setHeader('Vary', 'Origin');
-    }
+    res.setHeader('Access-Control-Allow-Origin', '*');
     if (req.method === 'OPTIONS' && req.url === '/recipe') {
       res.writeHead(204, {
         'Access-Control-Allow-Methods': 'POST, OPTIONS',
@@ -64,10 +49,6 @@ export function createRecipeServer({ apiKey, accessToken, allowedOrigins = [], m
     }
     if (req.method !== 'POST' || req.url !== '/recipe') {
       respond(res, 404, { error: 'Not found.' });
-      return;
-    }
-    if (!authorized(req.headers.authorization, accessToken)) {
-      respond(res, 401, { error: 'Invalid access token.' });
       return;
     }
     let body = '';
@@ -151,8 +132,6 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   try {
     const server = createRecipeServer({
       apiKey: process.env.OPENAI_API_KEY,
-      accessToken: process.env.RECIPE_ACCESS_TOKEN,
-      allowedOrigins: (process.env.RECIPE_ALLOWED_ORIGINS || '').split(',').map((origin) => origin.trim()).filter(Boolean),
       model: process.env.OPENAI_MODEL || undefined,
     });
     server.listen(Number(process.env.PORT || 3001), '0.0.0.0', () => console.log('Recipe server is listening.'));

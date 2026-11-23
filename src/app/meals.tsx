@@ -37,7 +37,6 @@ export default function MealsScreen() {
   const [craving, setCraving] = useState('');
   const [aiRequest, setAiRequest] = useState('');
   const [serverUrl, setServerUrl] = useState('');
-  const [accessToken, setAccessToken] = useState('');
   const visibleRecipes = recipes.filter((recipe) =>
     ideaType === 'ai'
       ? recipe.source === 'ai'
@@ -106,25 +105,10 @@ export default function MealsScreen() {
             placeholderTextColor="#94a3b8"
             className="px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-900"
           />
-          <Text className="text-sm font-semibold text-slate-700">Server access token</Text>
-          <TextInput
-            accessibilityLabel="Server access token"
-            value={accessToken}
-            onChangeText={setAccessToken}
-            autoCapitalize="none"
-            autoCorrect={false}
-            secureTextEntry
-            placeholder="Your server access token"
-            placeholderTextColor="#94a3b8"
-            className="px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-900"
-          />
-          <Text className="text-xs text-slate-500">
-            The access token stays in this app session. Your OpenAI API key belongs only on the server.
-          </Text>
           <Pressable
             accessibilityRole="button"
             disabled={isGenerating}
-            onPress={() => generateAiRecipe(serverUrl, accessToken, aiRequest)}
+            onPress={() => generateAiRecipe(serverUrl, aiRequest)}
             className={`py-4 rounded-2xl items-center ${isGenerating ? 'bg-emerald-600/60' : 'bg-emerald-600'}`}
           >
             <Text className="text-white font-extrabold text-base">

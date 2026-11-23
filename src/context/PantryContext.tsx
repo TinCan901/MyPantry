@@ -99,7 +99,7 @@ interface PantryContextValue {
   isIngredientOnShoppingList: (ingredientText: string) => boolean;
   generateMeals: (opts: GenerateOptions) => Promise<void>;
   generateBaking: () => void;
-  generateAiRecipe: (serverUrl: string, accessToken: string, request: string) => Promise<void>;
+  generateAiRecipe: (serverUrl: string, request: string) => Promise<void>;
   addBookRecipe: (recipe: Omit<Recipe, 'id'>) => void;
   saveRecipeToFavorites: (id: string) => void;
   removeSavedRecipe: (id: string) => void;
@@ -535,11 +535,11 @@ export function PantryProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const generateAiRecipe = async (serverUrl: string, accessToken: string, request: string) => {
+  const generateAiRecipe = async (serverUrl: string, request: string) => {
     setAiError(null);
     setIsGenerating(true);
     try {
-      const recipe = await requestAiRecipe(serverUrl, accessToken, request);
+      const recipe = await requestAiRecipe(serverUrl, request);
       setRecipes([{ ...recipe, source: 'ai', id: `${Date.now()}-ai` }]);
     } catch (error: unknown) {
       setAiError(error instanceof Error ? error.message : 'Could not generate the recipe.');
