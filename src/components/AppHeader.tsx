@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Pressable } from 'react-native';
+import { View, Text, Pressable, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { usePantry } from '../context/PantryContext';
@@ -13,9 +13,11 @@ export function AppHeader() {
     <SafeAreaView edges={['top']} className="bg-slate-50 px-5 pt-2 pb-4">
       <View className="flex-row items-center justify-between">
         <View className="flex-row items-center gap-3">
-          <View className="w-11 h-11 rounded-2xl bg-emerald-700 items-center justify-center shadow-sm">
-            <Text className="text-xl text-white">✦</Text>
-          </View>
+          <Image
+            source={require('../../assets/images/icon.png')}
+            accessibilityLabel="PantryPrep logo"
+            className="w-11 h-11 rounded-2xl"
+          />
           <View className="gap-0.5">
             <Text className="text-lg font-extrabold text-slate-900 tracking-tight">
               PantryPrep
