@@ -41,7 +41,7 @@ The static site does not run the AI backend. Deploy the recipe server separately
 
 ## Build the iOS and Android apps
 
-This project includes Expo build profiles for iOS and Android. Install the Expo Build CLI with `npx eas-cli@latest build:configure`, sign in to an Expo account, and run `npx eas-cli@latest build --platform ios` or `npx eas-cli@latest build --platform android`. iOS builds require Apple developer account credentials and a valid signing certificate; Android builds can produce APK or AAB outputs from the build profile.
+This project includes Expo build profiles for iOS and Android. Install the Expo Build CLI with `npx eas-cli@latest build:configure`, sign in to an Expo account, and run `npx eas-cli@latest build --platform ios` or `npx eas-cli@latest build --platform android --profile preview`. iOS builds require Apple developer account credentials and a valid signing certificate. The `preview` Android profile produces an installable `.apk`.
 
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
 
