@@ -29,7 +29,6 @@ export function RecipeCard({ meal, isSavedTab }: RecipeCardProps) {
   const isAlreadySaved = savedRecipes.some(
     (s) => s.title.toLowerCase() === meal.title.toLowerCase()
   );
-  const kcal = Number(meal.calories) || 0;
 
   const handleAddSide = async (idx: number) => {
     setLoadingSideIdx(idx);
@@ -61,28 +60,35 @@ export function RecipeCard({ meal, isSavedTab }: RecipeCardProps) {
               {meal.title}
             </Text>
             <Text className="text-sm text-slate-500 mt-1.5">
-              {meal.prepTime} <Text className="text-slate-300">·</Text>{' '}
+              {meal.category === 'baking' ? 'Baking · ' : ''}
+              {meal.prepTime ? `${meal.prepTime} · ` : ''}
               {meal.servings} {meal.servings === 1 ? 'serving' : 'servings'}
             </Text>
           </View>
 
-          <View className="px-3 py-2 rounded-2xl bg-emerald-50">
-            <Text className="text-sm font-bold text-emerald-800">
-              {meal.netCarbs}g Carbs
-            </Text>
-          </View>
+          {meal.netCarbs != null && (
+            <View className="px-3 py-2 rounded-2xl bg-emerald-50">
+              <Text className="text-sm font-bold text-emerald-800">
+                {meal.netCarbs}g Carbs
+              </Text>
+            </View>
+          )}
         </View>
 
-        <View className="flex-row flex-wrap gap-2">
-          <View className="px-3 py-2 rounded-xl bg-slate-50">
-            <Text className="text-sm text-slate-600 font-medium">
-              {meal.protein}g Protein
-            </Text>
+        {(meal.protein != null || meal.calories != null) && (
+          <View className="flex-row flex-wrap gap-2">
+            {meal.protein != null && (
+              <View className="px-3 py-2 rounded-xl bg-slate-50">
+                <Text className="text-sm text-slate-600 font-medium">{meal.protein}g Protein</Text>
+              </View>
+            )}
+            {meal.calories != null && (
+              <View className="px-3 py-2 rounded-xl bg-slate-50">
+                <Text className="text-sm text-slate-600 font-medium">{meal.calories} kcal</Text>
+              </View>
+            )}
           </View>
-          <View className="px-3 py-2 rounded-xl bg-slate-50">
-            <Text className="text-sm text-slate-600 font-medium">{kcal} kcal</Text>
-          </View>
-        </View>
+        )}
 
         {/* Action Buttons */}
         <View className="flex-row gap-2 pt-1">

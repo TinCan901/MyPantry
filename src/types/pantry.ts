@@ -29,9 +29,11 @@ export interface Recipe {
   title: string;
   prepTime: string;
   servings: number;
-  netCarbs: number;
-  protein: number;
-  calories: number;
+  netCarbs?: number;
+  protein?: number;
+  calories?: number;
+  category?: 'meal' | 'baking';
+  source?: 'ai';
   ingredients: string[];
   steps: string[];
   serveWith?: string[];

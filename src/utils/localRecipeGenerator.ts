@@ -37,6 +37,61 @@ interface RecipeIngredient {
   category?: PantryItem['category'];
 }
 
+export function generateBakingRecipes(dislikedTitles: string[]): Omit<Recipe, 'id'>[] {
+  const disliked = new Set(dislikedTitles.map((title) => title.toLowerCase()));
+  const recipes: Omit<Recipe, 'id'>[] = [
+    {
+      title: 'Simple Vanilla Muffins',
+      category: 'baking',
+      prepTime: '35 mins',
+      servings: 12,
+      ingredients: [
+        '250g plain flour', '100g sugar', '2 tsp baking powder', '1/4 tsp salt',
+        '1 egg', '240ml milk', '80ml vegetable oil', '1 tsp vanilla extract',
+      ],
+      steps: [
+        'Heat the oven to 200°C (180°C fan). Line a 12-cup muffin tin.',
+        'Whisk the flour, sugar, baking powder and salt in a bowl.',
+        'Whisk the egg, milk, oil and vanilla separately. Fold into the dry ingredients just until combined.',
+        'Divide between the cups and bake for 18–22 minutes, until golden and a skewer comes out clean. Cool before serving.',
+      ],
+    },
+    {
+      title: 'Easy Oat Cookies',
+      category: 'baking',
+      prepTime: '35 mins',
+      servings: 16,
+      ingredients: [
+        '115g softened butter', '100g brown sugar', '1 egg', '1 tsp vanilla extract',
+        '125g plain flour', '1/2 tsp baking powder', '1/4 tsp salt', '100g rolled oats',
+      ],
+      steps: [
+        'Heat the oven to 180°C (160°C fan) and line a baking tray.',
+        'Beat the butter and sugar until creamy, then beat in the egg and vanilla.',
+        'Mix in the flour, baking powder, salt and oats. Place spoonfuls on the tray, spaced apart.',
+        'Bake for 10–14 minutes until the edges are golden. Leave on the tray for 5 minutes, then transfer to a rack.',
+      ],
+    },
+    {
+      title: 'Banana Loaf',
+      category: 'baking',
+      prepTime: '1 hr 15 mins',
+      servings: 10,
+      ingredients: [
+        '3 ripe bananas', '75g melted butter', '100g sugar', '2 eggs',
+        '200g plain flour', '2 tsp baking powder', '1/4 tsp salt',
+      ],
+      steps: [
+        'Heat the oven to 180°C (160°C fan). Grease and line a loaf tin.',
+        'Mash the bananas, then stir in the melted butter, sugar and eggs.',
+        'Fold in the flour, baking powder and salt until just combined. Pour into the tin.',
+        'Bake for 50–60 minutes, until a skewer inserted in the center comes out clean. Cool before slicing.',
+      ],
+    },
+  ];
+  return recipes.filter((recipe) => !disliked.has(recipe.title.toLowerCase()));
+}
+
 function findPantryItem(pantry: PantryItem[], term: string) {
   const normalized = term.toLowerCase().replace(/s$/, '');
   return pantry.find((item) => {

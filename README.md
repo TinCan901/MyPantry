@@ -3,7 +3,8 @@ RUN IN TERMINAL:
 npx expo start --tunnel ngrok
 
 
-
+$env:Path = "C:\Program Files\nodejs;$env:Path"
+npx expo lint
 
 
 
@@ -12,6 +13,29 @@ npx expo start --tunnel ngrok
 ## Built-in recipe generator
 
 PantryPrep creates recipe suggestions on-device using your pantry and meal preferences. It works offline and does not require an AI account, API key, or external provider.
+
+In Saved, choose **Add a cookbook recipe** to type a recipe, including baking recipes. Enter one ingredient and instruction per line; nutrition is not estimated for these recipes. In Meals, choose **Baking** for offline baking ideas. These are regular recipes, not necessarily low-carb; use the ingredient list to see what is in your pantry or add missing items to shopping. Photo scanning is not currently supported.
+
+## Ask AI for a recipe
+
+The **Meals → Ask AI** option sends only your typed request to an OpenAI-powered recipe server. It requires internet, an OpenAI account with API access and billing, and a separately deployed server. Recipes are not guaranteed to be accurate or low-carb; check ingredients, allergens, and cooking temperatures. Save a generated recipe using its **Save** button.
+
+The server uses Node.js 20 or newer. Deploy `server/recipe-server.mjs` to a Node host behind HTTPS and configure these environment variables in the host's secret settings:
+
+- `OPENAI_API_KEY`: your OpenAI API key. Never put it in the app or share it in chat.
+- `RECIPE_ACCESS_TOKEN`: a random secret of at least 32 characters. Generate one locally with `node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))"`. Enter this token in the app, not the OpenAI key.
+- `RECIPE_ALLOWED_ORIGINS`: comma-separated exact origins of your web app, such as `https://example.com`. Required for web browsers; native apps do not send a browser origin.
+- `PORT`: supplied by the host, or defaults to 3001. `OPENAI_MODEL` is optional and defaults to `gpt-5.4-mini`.
+
+Run the server with `node server/recipe-server.mjs`. In **Ask AI**, enter the HTTPS base URL and access token, then describe the dish. The token is kept in memory only, so it must be entered again after restarting the app. For local browser testing, HTTP is allowed only for `localhost` or `127.0.0.1`; include the browser's exact origin in `RECIPE_ALLOWED_ORIGINS`. Phone apps generally need a deployed HTTPS URL.
+
+The server requires the access token, limits request sizes and applies a basic per-process request limit. For an internet-facing deployment, use a hosting provider's HTTPS, additional rate limiting and spending limits; protect and rotate the access token if exposed. OpenAI usage can incur charges. Run backend checks with `node --test server/recipe-server.test.mjs`.
+
+## Host the web app on Render
+
+Push your changes to GitHub, then create a **Static Site** in Render and connect this repository. Use `npm ci && npx expo export --platform web` as the build command and `dist` as the publish directory. Render will build the selected branch on each push. The web app stores pantry and recipe data in the browser on that device; it does not sync between devices.
+
+The static site does not run the AI backend. Deploy the recipe server separately as described above before using **Ask AI**.
 
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
 

@@ -22,9 +22,11 @@ import {
 } from '../utils/pantryMath';
 import {
     addLocalSideToRecipe,
+    generateBakingRecipes,
     generateLocalRecipes,
     updateLocalRecipe,
 } from '../utils/localRecipeGenerator';
+import { requestAiRecipe } from '../utils/aiRecipe';
 
 export interface GenerateOptions {
   mealType: string;
@@ -96,6 +98,9 @@ interface PantryContextValue {
   isIngredientInPantry: (ingredientText: string) => boolean;
   isIngredientOnShoppingList: (ingredientText: string) => boolean;
   generateMeals: (opts: GenerateOptions) => Promise<void>;
+  generateBaking: () => void;
+  generateAiRecipe: (serverUrl: string, accessToken: string, request: string) => Promise<void>;
+  addBookRecipe: (recipe: Omit<Recipe, 'id'>) => void;
   saveRecipeToFavorites: (id: string) => void;
   removeSavedRecipe: (id: string) => void;
   dislikeRecipe: (id: string) => void;
@@ -518,6 +523,39 @@ export function PantryProvider({ children }: { children: React.ReactNode }) {
     showToast(`Saved "${meal.title}"`);
   };
 
+  const generateBaking = () => {
+    setAiError(null);
+    const suggestions = generateBakingRecipes(dislikedRecipes.map((item) => item.title));
+    setRecipes(suggestions.map((recipe, index) => ({
+      ...recipe,
+      id: `${Date.now()}-baking-${index}`,
+    })));
+    if (suggestions.length === 0) {
+      setAiError('All baking ideas have been skipped. Allow a recipe again in Saved to see it.');
+    }
+  };
+
+  const generateAiRecipe = async (serverUrl: string, accessToken: string, request: string) => {
+    setAiError(null);
+    setIsGenerating(true);
+    try {
+      const recipe = await requestAiRecipe(serverUrl, accessToken, request);
+      setRecipes([{ ...recipe, source: 'ai', id: `${Date.now()}-ai` }]);
+    } catch (error: unknown) {
+      setAiError(error instanceof Error ? error.message : 'Could not generate the recipe.');
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const addBookRecipe = (recipe: Omit<Recipe, 'id'>) => {
+    setSavedRecipes((prev) => [
+      { ...recipe, id: `${Date.now()}-book-${Math.random().toString(36).slice(2)}` },
+      ...prev,
+    ]);
+    showToast(`Saved "${recipe.title}"`);
+  };
+
   const removeSavedRecipe = (id: string) => {
     setSavedRecipes((prev) => prev.filter((r) => r.id !== id));
     showToast('Removed from Saved Recipes');
@@ -566,9 +604,9 @@ export function PantryProvider({ children }: { children: React.ReactNode }) {
           ? {
               ...item,
               title: result.title,
-              netCarbs: (Number(item.netCarbs) || 0) + result.addedCarbs,
-              protein: (Number(item.protein) || 0) + result.addedProtein,
-              calories: (Number(item.calories) || 0) + result.addedCalories,
+              netCarbs: item.netCarbs == null ? undefined : item.netCarbs + result.addedCarbs,
+              protein: item.protein == null ? undefined : item.protein + result.addedProtein,
+              calories: item.calories == null ? undefined : item.calories + result.addedCalories,
               ingredients: [...item.ingredients, ...result.sideIngredients],
               steps: [...item.steps, ...result.sideSteps],
               addedSides: [...(item.addedSides || []), sideName],
@@ -643,6 +681,9 @@ export function PantryProvider({ children }: { children: React.ReactNode }) {
         isIngredientInPantry,
         isIngredientOnShoppingList,
         generateMeals,
+        generateBaking,
+        generateAiRecipe,
+        addBookRecipe,
         saveRecipeToFavorites,
         removeSavedRecipe,
         dislikeRecipe,

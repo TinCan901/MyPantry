@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ScrollView, View, Text, Pressable } from 'react-native';
 import { usePantry } from '../context/PantryContext';
 import { RecipeCard } from '../components/RecipeCard';
+import { BookRecipeForm } from '../components/BookRecipeForm';
 
 export default function SavedScreen() {
   const { savedRecipes, dislikedRecipes, unbanDislikedRecipe } = usePantry();
+  const [addingRecipe, setAddingRecipe] = useState(false);
 
   return (
     <ScrollView
@@ -19,6 +21,18 @@ export default function SavedScreen() {
           Keep the meals you’d love to make again.
         </Text>
       </View>
+
+      {addingRecipe ? (
+        <BookRecipeForm onClose={() => setAddingRecipe(false)} />
+      ) : (
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => setAddingRecipe(true)}
+          className="py-4 rounded-2xl bg-emerald-600 items-center"
+        >
+          <Text className="text-white font-bold">+ Add a cookbook recipe</Text>
+        </Pressable>
+      )}
 
       {dislikedRecipes.length > 0 && (
         <View className="bg-white p-4 rounded-3xl border border-slate-200 gap-3">

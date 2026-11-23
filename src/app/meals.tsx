@@ -25,13 +25,24 @@ export default function MealsScreen() {
     elapsedSeconds,
     aiError,
     generateMeals,
+    generateBaking,
+    generateAiRecipe,
   } = usePantry();
 
+  const [ideaType, setIdeaType] = useState<'meals' | 'baking' | 'ai'>('meals');
   const [mealType, setMealType] = useState('Dinner');
   const [cookingType, setCookingType] = useState('Any');
   const [maxCarbs, setMaxCarbs] = useState('20g');
   const [pantryMode, setPantryMode] = useState('prioritize');
   const [craving, setCraving] = useState('');
+  const [aiRequest, setAiRequest] = useState('');
+  const [serverUrl, setServerUrl] = useState('');
+  const [accessToken, setAccessToken] = useState('');
+  const visibleRecipes = recipes.filter((recipe) =>
+    ideaType === 'ai'
+      ? recipe.source === 'ai'
+      : recipe.source !== 'ai' && (ideaType === 'baking' ? recipe.category === 'baking' : recipe.category !== 'baking')
+  );
 
   return (
     <ScrollView
@@ -47,6 +58,96 @@ export default function MealsScreen() {
         </Text>
       </View>
 
+      <View className="flex-row gap-2">
+        {(['meals', 'baking', 'ai'] as const).map((type) => (
+          <Pressable
+            key={type}
+            accessibilityRole="button"
+            accessibilityState={{ selected: ideaType === type, disabled: isGenerating }}
+            disabled={isGenerating}
+            onPress={() => setIdeaType(type)}
+            className={`flex-1 min-h-11 rounded-2xl items-center justify-center ${
+              ideaType === type ? 'bg-emerald-600' : 'bg-white border border-slate-200'
+            }`}
+          >
+            <Text className={`font-bold ${ideaType === type ? 'text-white' : 'text-slate-700'}`}>
+              {type === 'meals' ? 'Meals' : type === 'baking' ? 'Baking' : 'Ask AI'}
+            </Text>
+          </Pressable>
+        ))}
+      </View>
+
+      {ideaType === 'ai' ? (
+        <View className="bg-white p-5 rounded-3xl border border-slate-200 gap-4">
+          <Text className="text-base font-bold text-slate-900">What do you want to make?</Text>
+          <Text className="text-sm text-slate-500">
+            Describe a meal or bake. Your request is sent to your recipe server and OpenAI.
+            Review the result, especially cooking temperatures and allergens.
+          </Text>
+          <TextInput
+            accessibilityLabel="Recipe request"
+            value={aiRequest}
+            onChangeText={setAiRequest}
+            placeholder="e.g. I want to make a lemon cake"
+            placeholderTextColor="#94a3b8"
+            maxLength={500}
+            multiline
+            className="px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 min-h-20"
+          />
+          <Text className="text-sm font-semibold text-slate-700">Recipe server URL</Text>
+          <TextInput
+            accessibilityLabel="Recipe server URL"
+            value={serverUrl}
+            onChangeText={setServerUrl}
+            autoCapitalize="none"
+            autoCorrect={false}
+            keyboardType="url"
+            placeholder="https://your-recipe-server"
+            placeholderTextColor="#94a3b8"
+            className="px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-900"
+          />
+          <Text className="text-sm font-semibold text-slate-700">Server access token</Text>
+          <TextInput
+            accessibilityLabel="Server access token"
+            value={accessToken}
+            onChangeText={setAccessToken}
+            autoCapitalize="none"
+            autoCorrect={false}
+            secureTextEntry
+            placeholder="Your server access token"
+            placeholderTextColor="#94a3b8"
+            className="px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-900"
+          />
+          <Text className="text-xs text-slate-500">
+            The access token stays in this app session. Your OpenAI API key belongs only on the server.
+          </Text>
+          <Pressable
+            accessibilityRole="button"
+            disabled={isGenerating}
+            onPress={() => generateAiRecipe(serverUrl, accessToken, aiRequest)}
+            className={`py-4 rounded-2xl items-center ${isGenerating ? 'bg-emerald-600/60' : 'bg-emerald-600'}`}
+          >
+            <Text className="text-white font-extrabold text-base">
+              {isGenerating ? 'Generating recipe...' : 'Generate Recipe'}
+            </Text>
+          </Pressable>
+        </View>
+      ) : ideaType === 'baking' ? (
+        <View className="bg-white p-5 rounded-3xl border border-slate-200 gap-4">
+          <Text className="text-base font-bold text-slate-900">Baking ideas</Text>
+          <Text className="text-sm text-slate-500">
+            Get simple baking recipes, including regular recipes that are not low-carb.
+            Check the ingredients against your pantry and add missing items to your shopping list.
+          </Text>
+          <Pressable
+            accessibilityRole="button"
+            onPress={generateBaking}
+            className="py-4 rounded-2xl items-center bg-emerald-600"
+          >
+            <Text className="text-white font-extrabold text-base">Generate Baking Ideas</Text>
+          </Pressable>
+        </View>
+      ) : (
       <View className="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm gap-5">
         <View className="flex-row items-center justify-between">
           <Text className="text-base font-bold text-slate-900">
@@ -190,6 +291,7 @@ export default function MealsScreen() {
           </Text>
         </Pressable>
       </View>
+      )}
 
       {aiError && (
         <View className="p-4 rounded-2xl bg-rose-50 border border-rose-200">
@@ -199,14 +301,14 @@ export default function MealsScreen() {
 
       <View className="flex-row items-center justify-between">
         <Text className="text-lg font-extrabold text-slate-900">Your recipes</Text>
-        {recipes.length > 0 && (
+        {visibleRecipes.length > 0 && (
           <Text className="text-sm font-medium text-slate-500">
-            {recipes.length} {recipes.length === 1 ? 'recipe' : 'recipes'}
+            {visibleRecipes.length} {visibleRecipes.length === 1 ? 'recipe' : 'recipes'}
           </Text>
         )}
       </View>
 
-      {recipes.length === 0 ? (
+      {visibleRecipes.length === 0 ? (
         <View className="bg-white rounded-3xl border border-slate-200 p-8 items-center gap-2">
           <View className="w-14 h-14 rounded-2xl bg-amber-50 items-center justify-center mb-1">
             <Text className="text-2xl">🍽️</Text>
@@ -215,11 +317,15 @@ export default function MealsScreen() {
             Your next favorite starts here
           </Text>
           <Text className="text-sm text-slate-500 text-center leading-5">
-            Choose a few preferences, then we’ll suggest meals you can make.
+            {ideaType === 'ai'
+              ? 'Describe a dish to generate a recipe.'
+              : ideaType === 'baking'
+              ? 'Generate baking ideas to see recipes here.'
+              : 'Choose a few preferences, then we’ll suggest meals you can make.'}
           </Text>
         </View>
       ) : (
-        recipes.map((meal) => <RecipeCard key={meal.id} meal={meal} isSavedTab={false} />)
+        visibleRecipes.map((meal) => <RecipeCard key={meal.id} meal={meal} isSavedTab={false} />)
       )}
     </ScrollView>
   );

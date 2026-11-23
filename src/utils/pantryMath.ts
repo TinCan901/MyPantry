@@ -134,7 +134,7 @@ export function findMatchingPantryItem(
       .filter((s) => s.length >= 3);
 
     return keywords.some((kw) => {
-      const singular = kw.endsWith('s') && kw.length > 4 ? kw.slice(0, -1) : kw;
+      const singular = kw.endsWith('s') && kw.length > 3 ? kw.slice(0, -1) : kw;
       return cleanIng.includes(kw) || cleanIng.includes(singular);
     });
   });
