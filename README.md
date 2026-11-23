@@ -35,6 +35,8 @@ The server requires the access token, limits request sizes and applies a basic p
 
 Push your changes to GitHub, then create a **Static Site** in Render and connect this repository. Use `npm ci && npx expo export --platform web` as the build command and `dist` as the publish directory. Render will build the selected branch on each push. The web app stores pantry and recipe data in the browser on that device; it does not sync between devices.
 
+For direct links and page refreshes, add **Rewrite** rules in the site's Redirects/Rewrites settings: `/meals` to `/meals.html`, `/saved` to `/saved.html`, and `/shopping` to `/shopping.html`.
+
 The static site does not run the AI backend. Deploy the recipe server separately as described above before using **Ask AI**.
 
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
