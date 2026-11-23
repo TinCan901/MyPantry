@@ -8,7 +8,10 @@
     "scheme": "mypantry",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "bundleIdentifier": "com.tincan901.mypantry",
+      "buildNumber": "1",
+      "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
